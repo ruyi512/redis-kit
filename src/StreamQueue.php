@@ -9,48 +9,47 @@ class StreamQueue
     const OFFSET_UNREAD = '>';          # 从未读的数据开始
     const OFFSET_UNCONFIRMED = '0';     # 从未确认数据第一条开始
 
-    protected $topic;
+    protected $queueName;
     protected $group;
     protected $consumer;
     protected $client;
 
-    public function __construct($topic, $client, $group=null, $consumer=null)
+    public function __construct($queueName, $client, $group=null, $consumer=null)
     {
-        $this->topic = $topic;
+        $this->queueName = $queueName;
         $this->group = $group;
         $this->consumer = $consumer;
         $this->client = $client;
 
         if ($this->group) {
-            $this->initTopic();
-            $this->initGroup();
+            $this->init();
         }
     }
 
     /**
-     * 发布消息
+     * 入队
      * @param string $message
      */
-    public function produce($message)
+    public function push($message)
     {
         $messages = ['message' => $message];
-        $this->client->xAdd($this->topic, '*', $messages);
+        $this->client->xAdd($this->queueName, '*', $messages);
     }
 
     /**
-     * 消费消息
+     * 出队
      * @param int $count 消息数
      * @param null|int $block 阻塞时间，毫秒
      * @return array
      */
-    public function consume($count, $block=null, $offset=self::OFFSET_UNREAD)
+    public function pop($count, $block=null, $offset=self::OFFSET_UNREAD)
     {
-        $streams = [$this->topic => $offset];
+        $streams = [$this->queueName => $offset];
         $data = $this->client->xReadGroup($this->group, $this->consumer, $streams, $count, $block);
 
         $messages = [];
         if ($data) {
-            $rows = $this->toArray($data[$this->topic]);
+            $rows = $this->toArray($data[$this->queueName]);
             $messages = $rows;
         }
 
@@ -62,7 +61,7 @@ class StreamQueue
      */
     public function getPending($count)
     {
-        return $this->consume($count, null, self::OFFSET_UNCONFIRMED);
+        return $this->pop($count, null, self::OFFSET_UNCONFIRMED);
     }
 
     /**
@@ -70,20 +69,24 @@ class StreamQueue
      */
     public function initGroup()
     {
-        $this->client->xGroup('CREATE', $this->topic, $this->group, 0);
+        if ($this->client->xPending($this->queueName, $this->group) === false) {
+            $this->client->xGroup('CREATE', $this->queueName, $this->group, 0);
+        }
     }
 
     /**
-     * 创建一个空队列
+     * 如果队列不存在，创建一个空队列并声明一个消费组
      */
-    public function initTopic()
+    public function init()
     {
         # redis没办法创建空队列，先发布一条消息再删除
-        if (!$this->client->exists($this->topic)) {
+        if (!$this->client->exists($this->queueName)) {
             $messages = ['message' => ''];
-            $messageId = $this->client->xAdd($this->topic, '*', $messages);
+            $messageId = $this->client->xAdd($this->queueName, '*', $messages);
             $this->delete([$messageId]);
         }
+
+        $this->initGroup();
     }
 
     /**
@@ -91,7 +94,7 @@ class StreamQueue
      */
     public function ack($messageIds)
     {
-        $this->client->xAck($this->topic, $this->group, $messageIds);
+        $this->client->xAck($this->queueName, $this->group, $messageIds);
     }
 
     /**
@@ -100,7 +103,7 @@ class StreamQueue
      */
     public function delete($messageIds)
     {
-        $this->client->xDel($this->topic, $messageIds);
+        $this->client->xDel($this->queueName, $messageIds);
     }
 
     /**
@@ -109,7 +112,7 @@ class StreamQueue
      */
     public function getMessage($messageId)
     {
-        $data = $this->client->xRange($this->topic, $messageId, '+', 1); # 空代表取不到消息
+        $data = $this->client->xRange($this->queueName, $messageId, '+', 1); # 空代表取不到消息
 
         $message = null;
         if ($data) {
