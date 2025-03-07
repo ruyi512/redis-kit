@@ -1,0 +1,25 @@
+{
+    "name": "wangruyi/redis-kit",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Wangruyi\\RedisKit\\": "src/"
+        }
+    },
+    "description": "redis common toolset",
+    "license": "MIT",
+    "keywords": [
+        "redis",
+        "stream",
+        "distribution lock"
+    ],
+    "authors": [
+        {
+            "name": "wangruyi",
+            "email": "327401898@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.2.5"
+    }
+}
