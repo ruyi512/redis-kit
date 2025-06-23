@@ -4,7 +4,7 @@ namespace Wangruyi\RedisKit;
 /**
  * 基于Redis Stream结构的消息队列
  */
-class StreamQueue
+class MessageQueue
 {
     const OFFSET_UNREAD = '>';          # 从未读的数据开始
     const OFFSET_UNCONFIRMED = '0';     # 从未确认数据第一条开始
@@ -28,12 +28,21 @@ class StreamQueue
 
     /**
      * 入队
-     * @param string $message
+     * @param array $messages
      */
-    public function push($message)
+    public function push($messages)
     {
-        $messages = ['message' => $message];
-        $this->client->xAdd($this->queueName, '*', $messages);
+        if (count($messages) == 1) {
+            $content = ['message' => $messages[0]];
+            $this->client->xAdd($this->queueName, '*', $content);
+        }
+
+        $pipline = $this->client->pipeline();
+        foreach ($messages as $message) {
+            $content = ['message' => $message];
+            $this->client->xAdd($this->queueName, '*', $content);
+        }
+        $pipline->exec();
     }
 
     /**
