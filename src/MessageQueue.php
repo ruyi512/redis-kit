@@ -14,7 +14,7 @@ class MessageQueue
     protected $consumer;
     protected $client;
 
-    public function __construct($queueName, $client, $group=null, $consumer=null)
+    public function __construct($client, $queueName, $group=null, $consumer=null)
     {
         $this->queueName = $queueName;
         $this->group = $group;
@@ -40,7 +40,7 @@ class MessageQueue
         $pipline = $this->client->pipeline();
         foreach ($messages as $message) {
             $content = ['message' => $message];
-            $this->client->xAdd($this->queueName, '*', $content);
+            $pipline->xAdd($this->queueName, '*', $content);
         }
         $pipline->exec();
     }
