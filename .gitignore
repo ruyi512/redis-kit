@@ -4,3 +4,4 @@ composer.lock
 *.log
 log
 .aider*
+.phpunit.*

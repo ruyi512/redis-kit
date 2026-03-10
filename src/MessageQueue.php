@@ -112,6 +112,7 @@ class MessageQueue
      */
     public function delete($messageIds)
     {
+        var_dump($this->queueName, $messageIds);
         $this->client->xDel($this->queueName, $messageIds);
     }
 
@@ -121,7 +122,7 @@ class MessageQueue
      */
     public function getMessage($messageId)
     {
-        $data = $this->client->xRange($this->queueName, $messageId, '+', 1); # 空代表取不到消息
+        $data = $this->client->xRange($this->queueName, $messageId, $messageId, 1); # 空代表取不到消息
 
         $message = null;
         if ($data) {

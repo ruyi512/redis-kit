@@ -34,11 +34,11 @@ class Redis
     public static function getInstance($config)
     {
         $name = md5(serialize($config));
-        if (self::$_instances[$name]) {
-            return self::$_instances[$name];
+        if (!isset(self::$_instances[$name])) {
+            new self($name, $config);
         }
 
-        new self($name, $config);
+        return self::$_instances[$name];
     }
 
     /**
