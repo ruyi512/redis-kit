@@ -9,12 +9,6 @@
 - **消息队列（MessageQueue）**：基于 Redis Stream 结构，支持消费者组、未读/待处理消息重放、消息确认与删除
 - **锁工厂（RedisLockFactory）**：便捷创建分布式锁实例
 
-## 环境要求
-
-- PHP >= 7.4（建议 PHP 8.0+）
-- Redis >= 5.0（Stream 功能需要 5.0+）
-- [ext-redis](https://github.com/phpredis/phpredis) 扩展
-
 ## 安装
 
 通过 Composer 安装：
@@ -104,50 +98,3 @@ foreach ($messages as $msg) {
 $pending = $queue->getPending(10);
 // ...
 ```
-
-## 详细 API
-
-### Redis 类
-
-- `Redis::getInstance(array $config): \Redis` 获取 Redis 实例
-
-### RedisLock 类
-
-- `acquire(string $key, int $expires = 3, int $blocking = 0): bool` 申请锁
-- `release(string $key): void` 释放锁
-
-### RedisLockFactory 类
-
-- `create(array $config): RedisLock` 创建锁实例
-
-### MessageQueue 类
-
-- `push(array $messages): void` 入队
-- `pop(int $count, ?int $block = null, string $offset = self::OFFSET_UNREAD): array` 出队
-- `getPending(int $count): array` 获取待处理消息
-- `ack(array $messageIds): void` 确认消息
-- `delete(array $messageIds): void` 删除消息
-- `getMessage(string $messageId): ?array` 根据 ID 获取消息
-- `init(): void` 初始化队列与消费者组
-
-## 测试
-
-确保安装了 PHPUnit，然后运行：
-
-```bash
-./vendor/bin/phpunit tests/
-```
-
-（目前项目尚未提供完整的测试套件，欢迎贡献。）
-
-## 许可证
-
-MIT
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request。
-
-## 作者
-
-[Wangruyi](https://github.com/wangruyi)
