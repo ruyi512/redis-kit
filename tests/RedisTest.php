@@ -10,13 +10,18 @@ use Wangruyi\RedisKit\Redis;
  */
 class RedisTest extends TestCase
 {
-    protected static $config = [
-        'host'     => '127.0.0.1',
-        'port'     => 6379,
-        'timeout'  => 5.0,
-        'password' => '',
-        'select'   => 0,
-    ];
+    protected static $config = [];
+
+    public static function setUpBeforeClass():void
+    {
+        self::$config = [
+            'host'     => $_ENV['REDIS_HOST'] ?? '127.0.0.1',
+            'port'     => $_ENV['REDIS_PORT'] ?? 6379,
+            'timeout'  => 5.0,
+            'password' => $_ENV['REDIS_AUTH'] ?? '',
+            'select'   => $_ENV['REDIS_DB'] ?? 0,
+        ];
+    }
 
     public function testGetInstance()
     {

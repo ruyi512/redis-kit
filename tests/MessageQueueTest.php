@@ -11,18 +11,23 @@ use Wangruyi\RedisKit\MessageQueue;
  */
 class MessageQueueTest extends TestCase
 {
-    protected static $config = [
-        'host'     => '127.0.0.1',
-        'port'     => 6379,
-        'timeout'  => 5.0,
-        'password' => '',
-        'select'   => 0,
-    ];
+    protected static $config = [];
 
     protected $redis;
     protected $queueName = 'test_stream';
     protected $group = 'test_group';
     protected $consumer = 'test_consumer';
+
+    public static function setUpBeforeClass():void
+    {
+        self::$config = [
+            'host'     => $_ENV['REDIS_HOST'] ?? '127.0.0.1',
+            'port'     => $_ENV['REDIS_PORT'] ?? 6379,
+            'timeout'  => 5.0,
+            'password' => $_ENV['REDIS_AUTH'] ?? '',
+            'select'   => $_ENV['REDIS_DB'] ?? 0,
+        ];
+    }
 
     protected function setUp(): void
     {

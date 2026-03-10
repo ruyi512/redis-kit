@@ -5,3 +5,4 @@ composer.lock
 log
 .aider*
 .phpunit.*
+phpunit.xml

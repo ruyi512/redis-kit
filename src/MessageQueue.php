@@ -112,7 +112,6 @@ class MessageQueue
      */
     public function delete($messageIds)
     {
-        var_dump($this->queueName, $messageIds);
         $this->client->xDel($this->queueName, $messageIds);
     }
 

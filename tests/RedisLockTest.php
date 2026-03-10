@@ -11,15 +11,20 @@ use Wangruyi\RedisKit\RedisLock;
  */
 class RedisLockTest extends TestCase
 {
-    protected static $config = [
-        'host'     => '127.0.0.1',
-        'port'     => 6379,
-        'timeout'  => 5.0,
-        'password' => '',
-        'select'   => 0,
-    ];
+    protected static $config = [];
 
     protected $redis;
+
+    public static function setUpBeforeClass():void
+    {
+        self::$config = [
+            'host'     => $_ENV['REDIS_HOST'] ?? '127.0.0.1',
+            'port'     => $_ENV['REDIS_PORT'] ?? 6379,
+            'timeout'  => 5.0,
+            'password' => $_ENV['REDIS_AUTH'] ?? '',
+            'select'   => $_ENV['REDIS_DB'] ?? 0,
+        ];
+    }
 
     protected function setUp(): void
     {
