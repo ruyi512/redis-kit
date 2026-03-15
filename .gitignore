@@ -6,3 +6,4 @@ log
 .aider*
 .phpunit.*
 phpunit.xml
+.claude

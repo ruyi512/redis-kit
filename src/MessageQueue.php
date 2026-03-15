@@ -32,17 +32,20 @@ class MessageQueue
      */
     public function push($messages)
     {
-        if (count($messages) == 1) {
-            $content = ['message' => $messages[0]];
-            $this->client->xAdd($this->queueName, '*', $content);
+        if (!is_array($messages)) {
+            throw new \InvalidArgumentException('Messages must be an array');
         }
 
-        $pipline = $this->client->pipeline();
+        if (empty($messages)) {
+            return;
+        }
+
+        $pipeline = $this->client->pipeline();
         foreach ($messages as $message) {
             $content = ['message' => $message];
-            $pipline->xAdd($this->queueName, '*', $content);
+            $pipeline->xAdd($this->queueName, '*', $content);
         }
-        $pipline->exec();
+        $pipeline->exec();
     }
 
     /**
